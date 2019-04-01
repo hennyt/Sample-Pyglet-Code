@@ -9,7 +9,6 @@ debug = True
 ## Tasks
 #1) Change the frame rate so that the whole thing goes faster or slower
 #2) Change the initial ball and paddle speeds so that they move farther
-#3) Make a ForwardPaddle subclass (initially, don't override anything)
 #4) Put multiple balls in play at the same time!
 #5) Speed up the balls every fourth time they hit a paddle.
   # a) We have already created a method increment_hit_count in the Game class
@@ -17,18 +16,8 @@ debug = True
   # method and calling the superclass' deflect_ball method after calling increment_hit_count)
   # c) Add to the code for increment_hit_count to make it increment all the balls' velocities
   #    if the counter is divisible by 4.
-#6) Add forward paddles to the game
-#7) Modify forward paddles to allow horizontal movement as well as vertical
-  # HINT: just pass additional parameters when creating the instances
-#8) Modify ForwardPaddle so that when ball is going your direction, it passes right through the paddle
-  # HINT: override the deflect_ball method
-#9) OPTIONAL CHALLENGE: integrate with lecture material on curved paddles: when the ball is going your
-  # direction, treat it like it hit your paddle from the other side, so that you can deliberately
-  # misdirect the ball with your forward paddle
-#10) OPTIONAL: with horizontal movement, don't let the forward paddles get too close to the goals, analogous
-  # to something we did in lecture
 
-
+#Doing: tasks one, two, four, five. Additional task: play sounds?
 def as_cartesian(velocity,angle):
     if angle is None:
         return 0,0
@@ -114,7 +103,7 @@ class EndLine(BallDeflector):
 
 class Ball(GameObject):
 
-    default_velocity = 6.0 #Number of pixels the ball should move per game cycle
+    default_velocity = 3.0 #Number of pixels the ball should move per game cycle
 
     def update(self,pressed_keys):
         self.move()
@@ -212,7 +201,7 @@ class Ball(GameObject):
 
 class Paddle (BallDeflector):
 
-    default_velocity = 4.0
+    default_velocity = 12.0
 
     def __init__(self, player = None, up_key =None, down_key =None, left_key = None, right_key = None,
         name = None, img_file = None,
