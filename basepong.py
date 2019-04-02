@@ -49,8 +49,6 @@ class GameObject(pyglet.sprite.Sprite):
     def update(self,pressed_keys):
         self.move()
 
-
-
 class BallDeflector(GameObject):
 
     def deflect_ball(self,ball,side_hit):
@@ -83,6 +81,7 @@ class EndLine(BallDeflector):
             self.game.reset()
         elif side_hit == 'RIGHT':
             # ball approached from the right
+            self.game.record_score(1)
             self.game.reset()
         else:
             # Shouldn't happen. Must have miscalculated which side was hit, since this is an endline
@@ -101,6 +100,8 @@ class Ball(GameObject):
                     game_object.deflect_ball(self, side_hit)
 
     def set_initial_position(self):
+        self.initial_x = 20
+        self.initial_y = 20
         self.set_position(self.initial_x, self.initial_y)
         self.velocity = self.default_velocity
         self.angle = self.generate_random_starting_angle()
@@ -111,7 +112,8 @@ class Ball(GameObject):
         Generate a random angle that isn't too close to straight up and down or straight side to side
         :return: an angle in degrees
         '''
-        angle = random.randint(15,75)+90*random.randint(0,3)
+        #angle = random.randint(15,75)+90*random.randint(0,3)
+        angle = random.randint(10, 75)
         debug_print('Starting ball angle: ' + str(angle) + ' degrees')
         return angle
 
@@ -186,6 +188,11 @@ class Ball(GameObject):
         # balls don't deflect other balls
         pass
 
+class Brick(BallDeflector):
+    def deflect_ball(self, ball, side_hit):
+        BallDeflector.deflect_ball(self, ball=ball, side_hit=side_hit)
+        self.game.game_objects.remove(self)
+
 class Paddle (BallDeflector):
 
     default_velocity = 4.0
@@ -229,7 +236,6 @@ class Paddle (BallDeflector):
         pct = y_dist / float(virtual_height)
         return pct
 
-
 class Game(object):
     side_paddle_buffer = 50 # how far away from the side wall a paddle should start
     aux_paddle_buffer = 550 # how far away a forward paddle should start
@@ -265,14 +271,15 @@ class Game(object):
                     initial_y = self.height/2,
                     game=self
                     ),
-            Paddle(player = 2,
-                    up_key=pyglet.window.key.U,
-                    down_key=pyglet.window.key.J,
-                    name='Player 2',
-                    img_file=paddle_imgs[1],
-                    initial_x = self.width-self.side_paddle_buffer - paddle_width/2,
-                    initial_y = self.height/2,
-                    game=self)        ]
+            # Paddle(player = 2,
+            #         up_key=pyglet.window.key.U,
+            #         down_key=pyglet.window.key.J,
+            #         name='Player 2',
+            #         img_file=paddle_imgs[1],
+            #         initial_x = self.width-self.side_paddle_buffer - paddle_width/2,
+            #         initial_y = self.height/2,
+            #        game=self)        ]
+        ]
         self.walls = [
             BallDeflector(initial_x = 0, #bottom
                 initial_y = 0,
@@ -286,12 +293,22 @@ class Game(object):
                 initial_y = 0,
                 img_file = wall_imgs[0],
                 game = self),
-            EndLine(initial_x = self.width - wall_width, #right
+            BallDeflector(initial_x = self.width - wall_width, #right
                 initial_y = 0,
                 img_file = wall_imgs[0],
                 game = self),
         ]
         self.bricks = []  # Not used in this initial version
+        x_wall_value = width-brick_height #window dimensions are 800x450
+        for i in range(6):
+            for i in range(11):
+                self.bricks.append(Brick(
+                    initial_x = x_wall_value,
+                    initial_y = i*brick_height,
+                    img_file = wall_imgs[2],
+                    game = self))
+            x_wall_value -= brick_height
+
         self.game_objects = self.walls + self.bricks + self.paddles + self.balls
 
     def update(self,pressed_keys):
@@ -308,10 +325,9 @@ class Game(object):
             game_object.update(pressed_keys)
 
     def reset(self,pause=True):
-        # self.score = [0,0]
+        self.score = [0,0]
         for game_object in self.game_objects:
             game_object.set_initial_position()
-
 
         self.hit_count = 0
         debug_print('Game reset')
@@ -320,6 +336,11 @@ class Game(object):
         if pause:
             debug_print('Pausing. Hit P to unpause')
             self.game_window.pause()
+
+    def record_score(self,player_index):
+        self.score[player_index] += 1
+        self.game_window.score_label.text = 'Score: ' + str(self.score[0]) + ' - ' + str(self.score[1])
+        print('Score for player ' + str(player_index + 1) + '!. Score is now ' + str(self.score))
 
     def draw(self):
         for game_object in self.game_objects:
@@ -338,16 +359,16 @@ class GameWindow(pyglet.window.Window):
         self.paused = False
         self.game = Game(ball_img,paddle_imgs, wall_imgs, width,height,self)
         self.currently_pressed_keys = set() #At any given moment, this holds the keys that are currently being pressed. This gets passed to Game.update() to help it decide how to move its various game objects
-        self.score_label = pyglet.text.Label('Score: 0 - 0',
+        self.score_label = pyglet.text.Label('Score: 0 -- 0',
                           font_name='Times New Roman',
                           font_size=14,
-                          x=width-75, y=height-25,
+                          x=width-400, y=height-25,
                           anchor_x='center', anchor_y='center')
 
         # Decide how often we want to update the game, which involves
         # first telling the game object to update itself and all its objects
         # and then rendering the updated game using
-        self.fps = 20 #Number of frames per seconds
+        self.fps = 60 #Number of frames per seconds
 
         #This tells Pyglet to call GameWindow.update() once every fps-th of a second
         pyglet.clock.schedule_interval(self.update, 1.0/self.fps)
