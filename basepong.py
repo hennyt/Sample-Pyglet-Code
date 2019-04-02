@@ -192,6 +192,7 @@ class Brick(BallDeflector):
     def deflect_ball(self, ball, side_hit):
         BallDeflector.deflect_ball(self, ball=ball, side_hit=side_hit)
         self.game.game_objects.remove(self)
+        self.game.increment_hit_count()
 
 class Paddle (BallDeflector):
 
@@ -349,6 +350,11 @@ class Game(object):
     def increment_hit_count(self):
         # this method will be used in an exercise in discussion section
         self.hit_count += 1
+            # Additions to task below:
+        if (self.hit_count % 10) == 0:
+            print("speeding up")
+            for ball in self.balls:
+                ball.velocity += 1
 
 class GameWindow(pyglet.window.Window):
 
