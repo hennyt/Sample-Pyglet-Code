@@ -3,6 +3,7 @@ __author__ = 'Sam Carton and Paul Resnick'
 import pyglet
 import random
 import math
+import time
 
 debug = True
 
@@ -342,6 +343,10 @@ class Game(object):
         self.score[player_index] += 1
         self.game_window.score_label.text = 'Score: ' + str(self.score[0]) + ' - ' + str(self.score[1])
         print('Score for player ' + str(player_index + 1) + '!. Score is now ' + str(self.score))
+        #time.sleep(3)
+        #self.game_window.score_label.text = "Game Over"
+        # time.sleep(5)
+        # pyglet.app.exit()
 
     def draw(self):
         for game_object in self.game_objects:
@@ -370,6 +375,11 @@ class GameWindow(pyglet.window.Window):
                           font_size=14,
                           x=width-400, y=height-25,
                           anchor_x='center', anchor_y='center')
+        self.instr_label = pyglet.text.Label('press the w and s keys',
+                            font_name='Times New Roman',
+                            font_size=12,
+                            x=width-700, y=height-400,
+                            anchor_x='center', anchor_y='center')
 
         # Decide how often we want to update the game, which involves
         # first telling the game object to update itself and all its objects
@@ -428,6 +438,7 @@ class GameWindow(pyglet.window.Window):
         self.clear()
         self.game.draw()
         self.score_label.draw()
+        self.instr_label.draw()
 
     def redraw_label(self):
         self.score_label.text = 'Score: ' + str(self.game.score[0]) + ' - ' + str(self.game.score[1])
