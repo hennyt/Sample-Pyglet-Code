@@ -34,4 +34,4 @@ A game window is also defined, again by using inbuilt features of the Pyglet lib
 Different objects or sprites have different actions they can take. The first class of action is that of a BallDeflector. BallDeflectors deflect the ball. They do not otherwise interact with the ball.
 Endline is another class of objects. While Endlines inherit properties from BallDeflector, they also result in the game being paused, and someone getting a point.
 Paddles inherit from BallDeflector, too. However, Paddles are moveable.
-Bricks 
+Bricks inherit from BallDeflector, and are removed when they are touched by the Ball object.
